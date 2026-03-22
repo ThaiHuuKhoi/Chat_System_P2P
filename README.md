@@ -45,12 +45,18 @@ src/main/java/org/khoicg/chat/
   config/       AppConfig — đọc application.properties
   model/        Message, PeerInfo
   util/         AES, messageId, ACK hợp lệ
+  chord/        ChordRing — DHT (vòng + finger, tra successor)
   peer/         PeerApp, PeerClient, PeerServer
   tracker/      TrackerServer
   sim/          ChurnSimulator
 src/main/resources/
   application.properties
 ```
+
+## Tài liệu (báo cáo & lý thuyết)
+
+- `docs/BAO_CAO_DO_AN.md` — khung báo cáo đồ án  
+- `docs/AP_DUNG_GIAO_TRINH_DS.md` — **ánh xạ giáo trình** *Distributed Systems* (Tanenbaum & Van Steen) với kiến trúc và mã nguồn dự án  
 
 ## Gói nộp
 

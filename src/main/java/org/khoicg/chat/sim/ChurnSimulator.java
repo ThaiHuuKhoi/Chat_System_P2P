@@ -5,6 +5,7 @@ import org.khoicg.chat.config.AppConfig;
 import org.khoicg.chat.model.Message;
 import org.khoicg.chat.model.PeerInfo;
 import org.khoicg.chat.peer.PeerClient;
+import org.khoicg.chat.peer.PeerMessagingAdapter;
 import org.khoicg.chat.peer.PeerServer;
 
 import java.util.concurrent.ThreadLocalRandom;
@@ -75,7 +76,8 @@ public final class ChurnSimulator {
 
     private static void churnLoop(String peerId, int listenPort, String trackerHost, int trackerPort, AtomicBoolean globalRun) {
         PeerClient client = new PeerClient();
-        PeerServer server = new PeerServer(listenPort, peerId);
+        PeerMessagingAdapter messaging = new PeerMessagingAdapter(client, trackerHost, trackerPort);
+        PeerServer server = new PeerServer(listenPort, peerId, messaging);
         server.setDaemon(true);
         server.start();
 

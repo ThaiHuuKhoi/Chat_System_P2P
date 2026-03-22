@@ -35,4 +35,9 @@ public final class AppConfig {
     public static String peerAdvertiseHost() {
         return PROPS.getProperty("peer.advertise.host", "localhost");
     }
+
+    /** Số bit không gian định danh Chord: 2^m (mặc định 8 → 256 điểm trên vòng). */
+    public static int chordIdentifierBits() {
+        return Integer.parseInt(PROPS.getProperty("chord.m", "8"));
+    }
 }
