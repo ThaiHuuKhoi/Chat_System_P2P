@@ -71,3 +71,4 @@ $RECYCLE.BIN/
 
 # --- Tài liệu / PDF lớn cục bộ (bỏ comment dòng dưới nếu muốn commit file trong repo) ---
 # *.pdf
+.docs
