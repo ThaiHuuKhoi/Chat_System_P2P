@@ -1,4 +1,4 @@
-# --- Maven / Java ---
+﻿# --- Maven / Java ---
 target/
 pom.xml.tag
 pom.xml.releaseBackup
@@ -75,9 +75,4 @@ $RECYCLE.BIN/
 # --- Tài liệu / PDF lớn cục bộ (bỏ comment dòng dưới nếu muốn commit file trong repo) ---
 # *.pdf
 
-# --- Next.js (web/) ---
-web
-web/node_modules/
-web/.next/
-web/out/
-web/.env*.local
+
