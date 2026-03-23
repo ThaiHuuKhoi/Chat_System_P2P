@@ -13,19 +13,16 @@ public final class PeerApplicationServices {
     public final GroupChatService groupChat;
     public final FileSendService fileSend;
     public final RelaySendService relaySend;
-    public final ChordQueryConsoleService chord;
 
     private PeerApplicationServices(PeerDirectoryService directory, OfflineMessageService offline,
                                     DirectChatService directChat, GroupChatService groupChat,
-                                    FileSendService fileSend, RelaySendService relaySend,
-                                    ChordQueryConsoleService chord) {
+                                    FileSendService fileSend, RelaySendService relaySend) {
         this.directory = directory;
         this.offline = offline;
         this.directChat = directChat;
         this.groupChat = groupChat;
         this.fileSend = fileSend;
         this.relaySend = relaySend;
-        this.chord = chord;
     }
 
     public static PeerApplicationServices create(PeerSessionContext session) {
@@ -35,8 +32,6 @@ public final class PeerApplicationServices {
         GroupChatService groupChat = new GroupChatService(session, directory, offline);
         FileSendService fileSend = new FileSendService(session);
         RelaySendService relaySend = new RelaySendService(session);
-        ChordResponsePrinter chordPrinter = new ChordResponsePrinter(session.gson());
-        ChordQueryConsoleService chord = new ChordQueryConsoleService(session, chordPrinter);
-        return new PeerApplicationServices(directory, offline, directChat, groupChat, fileSend, relaySend, chord);
+        return new PeerApplicationServices(directory, offline, directChat, groupChat, fileSend, relaySend);
     }
 }

@@ -5,7 +5,6 @@ import org.khoicg.chat.model.Message;
 import org.khoicg.chat.net.MessagingClient;
 import org.khoicg.chat.peer.console.MainMenuLoop;
 import org.khoicg.chat.peer.console.MenuAction;
-import org.khoicg.chat.peer.console.action.ChordMenuAction;
 import org.khoicg.chat.peer.console.action.DirectChatMenuAction;
 import org.khoicg.chat.peer.console.action.ExitMenuAction;
 import org.khoicg.chat.peer.console.action.FileSendMenuAction;
@@ -59,7 +58,6 @@ public final class PeerConsoleApplication {
                 new GroupChatMenuAction(),
                 new FileSendMenuAction(),
                 new RelayMenuAction(),
-                new ChordMenuAction(),
                 new ExitMenuAction(running)
         );
     }

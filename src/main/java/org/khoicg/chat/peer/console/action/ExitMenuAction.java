@@ -19,7 +19,7 @@ public final class ExitMenuAction implements MenuAction {
 
     @Override
     public String id() {
-        return "7";
+        return "6";
     }
 
     @Override

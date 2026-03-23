@@ -1,6 +1,5 @@
 package org.khoicg.chat.tracker;
 
-import org.khoicg.chat.chord.ChordRing;
 import org.khoicg.chat.model.Message;
 import org.khoicg.chat.model.PeerInfo;
 
@@ -17,15 +16,6 @@ public final class TrackerState {
     private final ConcurrentHashMap<String, PeerInfo> onlinePeers = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<String, Long> lastSeenPeers = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<String, List<Message>> offlineMessages = new ConcurrentHashMap<>();
-    private final ChordRing chord;
-
-    public TrackerState(int chordIdentifierBits) {
-        this.chord = new ChordRing(chordIdentifierBits);
-    }
-
-    public ChordRing chord() {
-        return chord;
-    }
 
     public void touch(String senderId) {
         if (senderId != null) {
@@ -36,7 +26,6 @@ public final class TrackerState {
     public void registerPeer(PeerInfo newPeer) {
         onlinePeers.put(newPeer.getPeerId(), newPeer);
         lastSeenPeers.put(newPeer.getPeerId(), System.currentTimeMillis());
-        chord.addPeer(newPeer);
     }
 
     public void removePeer(String peerId) {
@@ -45,7 +34,6 @@ public final class TrackerState {
         }
         onlinePeers.remove(peerId);
         lastSeenPeers.remove(peerId);
-        chord.removePeer(peerId);
     }
 
     public Collection<PeerInfo> onlinePeers() {

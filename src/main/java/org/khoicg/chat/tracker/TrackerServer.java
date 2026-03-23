@@ -2,9 +2,6 @@ package org.khoicg.chat.tracker;
 
 import com.google.gson.Gson;
 import org.khoicg.chat.config.AppConfig;
-import org.khoicg.chat.tracker.handler.ChordFingerTrackerHandler;
-import org.khoicg.chat.tracker.handler.ChordLookupTrackerHandler;
-import org.khoicg.chat.tracker.handler.ChordRingTrackerHandler;
 import org.khoicg.chat.tracker.handler.GetPeersTrackerHandler;
 import org.khoicg.chat.tracker.handler.HeartbeatTrackerHandler;
 import org.khoicg.chat.tracker.handler.PullOfflineTrackerHandler;
@@ -33,7 +30,7 @@ public final class TrackerServer {
 
     public static void main(String[] args) {
         int port = AppConfig.trackerPort();
-        TrackerState state = new TrackerState(AppConfig.chordIdentifierBits());
+        TrackerState state = new TrackerState();
         TrackerMessageDispatcher dispatcher = defaultDispatcher();
         System.out.println("=== Tracker Server (bootstrap) — port " + port + " ===");
         TrackerStalePeerMonitor monitor = new TrackerStalePeerMonitor(state);
@@ -50,10 +47,7 @@ public final class TrackerServer {
                 new HeartbeatTrackerHandler(),
                 new QuitTrackerHandler(),
                 new StoreOfflineTrackerHandler(),
-                new PullOfflineTrackerHandler(),
-                new ChordRingTrackerHandler(),
-                new ChordFingerTrackerHandler(),
-                new ChordLookupTrackerHandler()
+                new PullOfflineTrackerHandler()
         );
         return new TrackerMessageDispatcher(handlers);
     }

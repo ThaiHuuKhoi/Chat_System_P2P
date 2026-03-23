@@ -17,6 +17,9 @@ replay_pid*
 # --- Dự án Chat: file nhận P2P (FileInboundHandler: downloads_<port>/) ---
 downloads_*/
 
+# --- Tài liệu cục bộ (báo cáo, nháp — không đẩy lên remote) ---
+docs/
+
 # --- Gói / build cục bộ (giữ ngoại lệ wrapper nếu sau này thêm mvnw) ---
 *.jar
 *.war
@@ -71,4 +74,10 @@ $RECYCLE.BIN/
 
 # --- Tài liệu / PDF lớn cục bộ (bỏ comment dòng dưới nếu muốn commit file trong repo) ---
 # *.pdf
-.docs
+
+# --- Next.js (web/) ---
+web
+web/node_modules/
+web/.next/
+web/out/
+web/.env*.local

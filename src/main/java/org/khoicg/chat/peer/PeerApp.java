@@ -30,11 +30,12 @@ public final class PeerApp {
         System.out.print("Nhập Port để nhận tin nhắn (vd: 5001, 5002...): ");
         int myPort = Integer.parseInt(scanner.nextLine());
 
+        PeerInfo self = new PeerInfo(myId, AppConfig.peerAdvertiseHost(), myPort);
+
         PeerServer server = new PeerServer(myPort, myId, messaging);
         server.start();
 
-        PeerInfo myInfo = new PeerInfo(myId, AppConfig.peerAdvertiseHost(), myPort);
-        Message regMsg = new Message("REGISTER", myId, gson.toJson(myInfo));
+        Message regMsg = new Message("REGISTER", myId, gson.toJson(self));
 
         System.out.print("\nTham gia mạng — (1) Tracker trực tiếp  (2) Qua peer đã biết (relay đăng ký): ");
         String joinMode = scanner.nextLine().trim();
