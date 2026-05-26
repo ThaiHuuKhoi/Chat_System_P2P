@@ -1,44 +1,87 @@
-﻿# P2P Chat System (Chat_System_P2P)
+# P2P Chat System (Chat_System_P2P)
 
 **Chủ đề 3:** Hệ thống phân tán — chat ngang hàng (Java): tracker bootstrap, tin P2P TCP, nhóm/broadcast, relay, offline store, mã hóa AES, mô phỏng churn. (Chord/DHT đã gỡ khỏi mã nguồn.)
 
+---
+
 ## Yêu cầu
 
-- JDK 24+
-- Maven 3.9+
+| Công cụ | Phiên bản tối thiểu |
+|---|---|
+| JDK | 24+ |
+| Maven | 3.9+ |
+| JavaFX | đã khai báo trong `pom.xml` (tự tải qua Maven) |
+
+---
 
 ## Cấu hình
 
-Chỉnh `src/main/resources/application.properties`:
+Chỉnh `src/main/resources/application.properties` trước khi chạy:
 
-- `tracker.host`, `tracker.port` — địa chỉ tracker
-- `peer.advertise.host` — IP/hostname peer khai báo khi đăng ký (đổi khi chạy nhiều máy LAN)
+```properties
+tracker.host=localhost      # IP/hostname máy chạy tracker
+tracker.port=9000           # cổng tracker
+peer.advertise.host=localhost  # IP peer tự khai báo khi đăng ký
+                               # (đổi thành IP LAN khi chạy nhiều máy)
+```
 
+---
 
+## Chạy nhanh (cùng máy — nhiều terminal)
 
-## Chạy nhanh
-
-**1. Tracker (terminal 1)**
+### Bước 1 — Khởi động Tracker
 
 ```bash
 mvn -q compile exec:java -Dexec.mainClass=org.khoicg.chat.tracker.TrackerServer
 ```
 
-**2. Peer (terminal 2+)**
+Tracker lắng nghe trên cổng `tracker.port` (mặc định **9000**).
+
+---
+
+### Bước 2 — Chạy Peer (chọn một trong hai chế độ)
+
+#### Giao diện đồ họa (JavaFX) — khuyến nghị
+
+```bash
+mvn javafx:run
+```
+
+Cửa sổ đăng nhập hiện ra — nhập **tên hiển thị** và **cổng peer** rồi nhấn **Connect**.
+
+#### Console (không có GUI)
 
 ```bash
 mvn -q compile exec:java
+# hoặc chỉ định rõ class:
+mvn -q compile exec:java -Dexec.mainClass=org.khoicg.chat.peer.PeerApp
 ```
 
-(hoặc `-Dexec.mainClass=org.khoicg.chat.peer.PeerApp`)
+> Mở thêm terminal và lặp lại Bước 2 (với cổng khác) để có nhiều peer trên cùng máy.
 
-**3. Mô phỏng churn (tùy chọn)**
+---
+
+## Chạy nhiều máy trên LAN
+
+1. Đặt `tracker.host` = IP máy chạy tracker, `tracker.port` = cổng không bị firewall chặn.
+2. Trên **mỗi peer**: đặt `peer.advertise.host` = IP LAN của máy đó (để các peer khác kết nối ngược lại được).
+3. Khởi động tracker trước, rồi khởi động từng peer.
+
+---
+
+## Đóng gói JAR (Tracker)
 
 ```bash
-mvn -q compile exec:java -Dexec.mainClass=org.khoicg.chat.sim.ChurnSimulator -Dexec.args="5 60 6100"
+mvn package
 ```
 
-Tham số: `[số_peer] [giây] [port_bắt_đầu] [tracker_host] [tracker_port]` — bỏ qua thì dùng mặc định / `application.properties`.
+Tạo ra `target/tracker.jar` — chạy tracker độc lập (không cần Maven):
+
+```bash
+java -jar target/tracker.jar
+```
+
+---
 
 ## Cấu trúc mã nguồn
 
@@ -47,19 +90,17 @@ src/main/java/org/khoicg/chat/
   config/       AppConfig — đọc application.properties
   model/        Message, PeerInfo
   util/         AES, messageId, ACK hợp lệ
-  peer/         PeerApp, PeerClient, PeerServer
-  tracker/      TrackerServer
-  sim/          ChurnSimulator
+  peer/
+    ui/         PeerFxApp, Launcher, LoginController, ChatController
+                (giao diện JavaFX — login.fxml, chat.fxml)
+    handler/    xử lý tin nhắn đến (chat, file, peer-changed, ...)
+    service/    DirectChat, GroupChat, Relay, FileSend, Heartbeat, ...
+    console/    menu console (dùng khi chạy không có GUI)
+  tracker/
+    handler/    xử lý lệnh từ peer (register, quit, store-offline, ...)
+    TrackerServer, TrackerState, TrackerPushBroadcaster, ...
+
 src/main/resources/
   application.properties
+  org/khoicg/chat/peer/ui/   login.fxml, chat.fxml, style.css
 ```
-
-## Tài liệu (báo cáo & lý thuyết)
-
-- `docs/BAO_CAO_DO_AN.md` — khung báo cáo đồ án  
-- `docs/AP_DUNG_GIAO_TRINH_DS.md` — **ánh xạ giáo trình** *Distributed Systems* (Tanenbaum & Van Steen) với kiến trúc và mã nguồn dự án  
-
-## Gói nộp
-
-Mã nguồn + báo cáo (kiến trúc, giao thức, discovery, xử lý lỗi & thử nghiệm) theo yêu cầu đồ án.
-
