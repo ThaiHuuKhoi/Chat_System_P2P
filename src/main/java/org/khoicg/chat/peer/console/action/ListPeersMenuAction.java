@@ -28,8 +28,12 @@ public final class ListPeersMenuAction implements MenuAction {
             return MenuResult.CONTINUE;
         }
         System.out.println("\n--- DANH SÁCH ONLINE ---");
-        for (PeerInfo p : peers) {
-            System.out.println("- " + p.getPeerId() + " (IP: " + p.getIpAddress() + ", Port: " + p.getPort() + ")");
+        if (peers.isEmpty()) {
+            System.out.println("(Chưa có peer nào online)");
+        } else {
+            for (PeerInfo p : peers) {
+                System.out.println("- " + p.getPeerId() + " (IP: " + p.getIpAddress() + ", Port: " + p.getPort() + ")");
+            }
         }
         return MenuResult.CONTINUE;
     }

@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.text.*?>
+<?import javafx.geometry.Insets?>
+<StackPane xmlns:fx="http://javafx.com/fxml/1"
+           fx:controller="org.khoicg.chat.peer.ui.LoginController"
+           styleClass="login-root">
+
+    <VBox alignment="CENTER_LEFT" spacing="10" maxWidth="360" styleClass="login-card">
+        <padding><Insets top="36" right="40" bottom="36" left="40"/></padding>
+
+        <!-- Title -->
+        <Label text="P2P Chat System" styleClass="login-title"/>
+        <Label text="Kết nối ngang hàng — không cần server trung tâm" styleClass="login-subtitle"/>
+
+        <Region prefHeight="6"/>
+
+        <!-- Peer ID -->
+        <Label text="Tên của bạn (Peer ID)" styleClass="login-label"/>
+        <TextField fx:id="peerIdField" promptText="VD: Alice" styleClass="login-field" maxWidth="Infinity"/>
+
+        <!-- Port -->
+        <Label text="Port lắng nghe" styleClass="login-label"/>
+        <TextField fx:id="portField" promptText="VD: 5001" styleClass="login-field" maxWidth="Infinity"/>
+
+        <Region prefHeight="4"/>
+        <Separator/>
+        <Region prefHeight="2"/>
+
+        <!-- Join mode -->
+        <Label text="Cách tham gia mạng" styleClass="login-label"/>
+        <RadioButton fx:id="directRadio" text="Trực tiếp qua Tracker" styleClass="radio-dark"/>
+        <RadioButton fx:id="relayRadio" text="Qua peer trung gian (relay)" styleClass="radio-dark"/>
+
+        <!-- Relay fields (hidden by default) -->
+        <VBox fx:id="relayBox" spacing="6" visible="false" managed="false">
+            <Region prefHeight="2"/>
+            <Label text="IP peer trung gian" styleClass="login-label"/>
+            <TextField fx:id="relayIpField" promptText="VD: localhost" styleClass="login-field" maxWidth="Infinity"/>
+            <Label text="Port peer trung gian" styleClass="login-label"/>
+            <TextField fx:id="relayPortField" promptText="VD: 5002" styleClass="login-field" maxWidth="Infinity"/>
+        </VBox>
+
+        <Region prefHeight="8"/>
+
+        <!-- Join button -->
+        <Button fx:id="joinButton" text="Tham gia mạng" onAction="#handleJoin"
+                maxWidth="Infinity" defaultButton="true" styleClass="join-btn"/>
+
+        <!-- Status label -->
+        <Label fx:id="statusLabel" text="" wrapText="true" maxWidth="Infinity"/>
+    </VBox>
+</StackPane>

@@ -3,15 +3,19 @@ package org.khoicg.chat.tracker;
 import org.khoicg.chat.model.Message;
 import org.khoicg.chat.model.PeerInfo;
 
-import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
+import java.util.ArrayList;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Mutable tracker state (SRP). Handlers mutate only through this type.
  */
 public final class TrackerState {
+
+    private static final int OFFLINE_QUEUE_LIMIT = 50;
 
     private final ConcurrentHashMap<String, PeerInfo> onlinePeers = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<String, Long> lastSeenPeers = new ConcurrentHashMap<>();
@@ -40,15 +44,21 @@ public final class TrackerState {
         return onlinePeers.values();
     }
 
-    public void storeOfflineFor(String targetId, Message storedMsg) {
-        offlineMessages.computeIfAbsent(targetId, k -> new ArrayList<>()).add(storedMsg);
+    public boolean storeOfflineFor(String targetId, Message storedMsg) {
+        List<Message> queue = offlineMessages.computeIfAbsent(
+                targetId, k -> Collections.synchronizedList(new ArrayList<>()));
+        synchronized (queue) {
+            if (queue.size() >= OFFLINE_QUEUE_LIMIT) return false;
+            queue.add(storedMsg);
+            return true;
+        }
     }
 
     public List<Message> takeOfflineQueue(String peerId) {
         return offlineMessages.remove(peerId);
     }
 
-    public ConcurrentHashMap<String, Long> lastSeenSnapshot() {
-        return lastSeenPeers;
+    public Map<String, Long> lastSeenSnapshot() {
+        return Collections.unmodifiableMap(lastSeenPeers);
     }
 }

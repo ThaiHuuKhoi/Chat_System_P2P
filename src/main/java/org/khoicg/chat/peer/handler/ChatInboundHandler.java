@@ -19,10 +19,13 @@ public final class ChatInboundHandler implements PeerInboundHandler {
             String decryptedContent = AESUtil.decrypt(msg.getContent());
             String prefix = "GROUP_CHAT".equals(msg.getType()) ? "[Tin nhắn Nhóm từ " : "[Tin nhắn từ ";
             System.out.println("\n" + prefix + msg.getSenderId() + "]: " + decryptedContent);
+            if (ctx.listener() != null) {
+                ctx.listener().onEvent(msg.getType(), msg.getSenderId(), decryptedContent);
+            }
         } else {
             System.out.println("\n[Bỏ qua tin trùng — cùng mã tin từ " + msg.getSenderId() + "]");
         }
-        System.out.print("Chọn chức năng: ");
+        if (ctx.listener() == null) System.out.print("Chọn chức năng: ");
         ctx.writeAck(msg, "Đã nhận");
     }
 }

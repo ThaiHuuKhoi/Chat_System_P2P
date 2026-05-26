@@ -4,6 +4,7 @@ import org.khoicg.chat.config.AppConfig;
 import org.khoicg.chat.model.Message;
 import org.khoicg.chat.peer.session.PeerSessionContext;
 
+import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -13,10 +14,16 @@ public final class PeerJoinService {
 
     private final PeerSessionContext session;
     private final OfflineMessageService offline;
+    private List<String> pendingOfflineMessages = List.of();
 
     public PeerJoinService(PeerSessionContext session, OfflineMessageService offline) {
         this.session = session;
         this.offline = offline;
+    }
+
+    /** Trả về tin nhắn offline sau khi completeJoin() thành công. */
+    public List<String> getPendingOfflineMessages() {
+        return pendingOfflineMessages;
     }
 
     /**
@@ -40,7 +47,12 @@ public final class PeerJoinService {
         if (registerOk) {
             System.out.println("[+] " + regParsed.getContent());
             HeartbeatService.startDaemon(session, running);
-            offline.printPulledOfflineInbox();
+            pendingOfflineMessages = offline.pullOfflineMessages();
+            if (!pendingOfflineMessages.isEmpty()) {
+                System.out.println("\n🔔 BẠN CÓ " + pendingOfflineMessages.size() + " TIN NHẮN KHI ĐANG OFFLINE:");
+                pendingOfflineMessages.forEach(m -> System.out.println("   -> " + m));
+                System.out.println("----------------------------------------");
+            }
             return true;
         }
 

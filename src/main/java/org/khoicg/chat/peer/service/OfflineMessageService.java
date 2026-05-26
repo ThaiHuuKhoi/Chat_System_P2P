@@ -6,13 +6,11 @@ import org.khoicg.chat.peer.session.PeerSessionContext;
 import org.khoicg.chat.util.AESUtil;
 
 import java.lang.reflect.Type;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-/**
- * STORE_OFFLINE / PULL_OFFLINE flows (SRP).
- */
 public final class OfflineMessageService {
 
     private final PeerSessionContext session;
@@ -28,9 +26,7 @@ public final class OfflineMessageService {
             store.setMessageId(messageId);
         }
         String resp = session.messaging().sendTracker(store);
-        if (resp == null) {
-            return false;
-        }
+        if (resp == null) return false;
         try {
             Message m = session.gson().fromJson(resp, Message.class);
             return "ACK".equals(m.getType());
@@ -39,36 +35,39 @@ public final class OfflineMessageService {
         }
     }
 
-    /** In ra tin offline sau khi đăng nhập (PULL_OFFLINE). */
-    public void printPulledOfflineInbox() {
+    /**
+     * Kéo tin nhắn offline từ Tracker, giải mã, và trả về danh sách chuỗi hiển thị.
+     * Dùng cho GUI — không in ra console.
+     */
+    public List<String> pullOfflineMessages() {
         Message pullMsg = new Message("PULL_OFFLINE", session.myId(), "");
         String pullResponse = session.messaging().sendTracker(pullMsg);
-        if (pullResponse == null) {
-            return;
-        }
+        if (pullResponse == null) return List.of();
         Message respMsg = session.gson().fromJson(pullResponse, Message.class);
-        if (!"OFFLINE_MESSAGES".equals(respMsg.getType())) {
-            return;
-        }
+        if (!"OFFLINE_MESSAGES".equals(respMsg.getType())) return List.of();
+
         Type msgListType = new TypeToken<List<Message>>() {}.getType();
         List<Message> missedMsgs = session.gson().fromJson(respMsg.getContent(), msgListType);
-        if (missedMsgs == null) {
-            missedMsgs = List.of();
-        }
+        if (missedMsgs == null) return List.of();
 
-        System.out.println("\n🔔 BẠN CÓ " + missedMsgs.size() + " TIN NHẮN KHI ĐANG OFFLINE:");
-        Set<String> seenPullKeys = new HashSet<>();
+        Set<String> seen = new HashSet<>();
+        List<String> result = new ArrayList<>();
         for (Message m : missedMsgs) {
             String mid = m.getMessageId();
             if (mid != null && !mid.isEmpty()) {
-                String key = m.getSenderId() + "|" + mid;
-                if (!seenPullKeys.add(key)) {
-                    continue;
-                }
+                if (!seen.add(m.getSenderId() + "|" + mid)) continue;
             }
-            String dec = AESUtil.decrypt(m.getContent());
-            System.out.println("   -> [Gửi từ " + m.getSenderId() + "]: " + dec);
+            result.add("[Gửi từ " + m.getSenderId() + "]: " + AESUtil.decrypt(m.getContent()));
         }
+        return result;
+    }
+
+    /** In ra inbox offline sau khi đăng nhập (dùng cho console). */
+    public void printPulledOfflineInbox() {
+        List<String> msgs = pullOfflineMessages();
+        if (msgs.isEmpty()) return;
+        System.out.println("\n🔔 BẠN CÓ " + msgs.size() + " TIN NHẮN KHI ĐANG OFFLINE:");
+        msgs.forEach(m -> System.out.println("   -> " + m));
         System.out.println("----------------------------------------");
     }
 }

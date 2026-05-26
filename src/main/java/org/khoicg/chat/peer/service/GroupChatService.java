@@ -6,8 +6,11 @@ import org.khoicg.chat.peer.session.PeerSessionContext;
 import org.khoicg.chat.util.AESUtil;
 import org.khoicg.chat.util.MessageIdUtil;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Scanner;
+import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 
 public final class GroupChatService {
 
@@ -16,9 +19,20 @@ public final class GroupChatService {
     private final OfflineMessageService offline;
 
     public GroupChatService(PeerSessionContext session, PeerDirectoryService directory, OfflineMessageService offline) {
-        this.session = session;
+        this.session   = session;
         this.directory = directory;
-        this.offline = offline;
+        this.offline   = offline;
+    }
+
+    public record GroupSendResult(int successCount, int storedCount, int failCount) {}
+
+    /** Gửi nhóm không qua Scanner (GUI). */
+    public GroupSendResult send(String targetsInput, String content) {
+        List<PeerInfo> peers = directory.fetchOnlinePeers();
+        if (peers == null) return new GroupSendResult(0, 0, 0);
+        String encrypted = AESUtil.encrypt(content);
+        String batchMsgId = MessageIdUtil.newId();
+        return doSend(buildTargetList(peers, targetsInput), encrypted, batchMsgId);
     }
 
     public void runInteractive(Scanner scanner) {
@@ -27,53 +41,66 @@ public final class GroupChatService {
             System.out.println("[-] Không lấy được danh bạ từ Tracker.");
             return;
         }
-
         System.out.print("Nhập ID những người muốn chat (cách nhau bằng dấu phẩy), hoặc gõ 'ALL' để gửi toàn mạng: ");
         String targets = scanner.nextLine();
         System.out.print("Nhập nội dung tin nhắn nhóm: ");
-        String content = scanner.nextLine();
+        String content  = scanner.nextLine();
 
-        String encryptedContent = AESUtil.encrypt(content);
-        System.out.println("Đang gửi đi chuỗi mã hóa: " + encryptedContent);
+        String encrypted  = AESUtil.encrypt(content);
         String batchMsgId = MessageIdUtil.newId();
-        Message groupMsg = new Message("GROUP_CHAT", session.myId(), encryptedContent);
+
+        List<PeerInfo> targetList = buildTargetList(peers, targets);
+        System.out.println("--- ĐANG GỬI TIN NHÓM (" + targetList.size() + " peer, song song) ---");
+        GroupSendResult r = doSend(targetList, encrypted, batchMsgId);
+        System.out.println("-> [Hoàn tất! " + r.successCount() + " thành công"
+                + (r.storedCount() > 0 ? ", " + r.storedCount() + " lưu offline" : "")
+                + (r.failCount()   > 0 ? ", " + r.failCount()   + " thất bại"    : "") + "]");
+    }
+
+    // ─── helpers ────────────────────────────────────────────────────────────────
+
+    private List<PeerInfo> buildTargetList(List<PeerInfo> peers, String targetsInput) {
+        boolean isBroadcast = targetsInput.equalsIgnoreCase("ALL");
+        String[] targetIds  = targetsInput.split(",");
+        return peers.stream()
+                .filter(p -> !p.getPeerId().equals(session.myId()))
+                .filter(p -> isBroadcast || Arrays.stream(targetIds)
+                        .anyMatch(t -> p.getPeerId().equalsIgnoreCase(t.trim())))
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Gửi tới tất cả peer trong danh sách song song (CompletableFuture).
+     * Mỗi peer chạy trên ForkJoinPool.commonPool() — thay bằng dedicated pool
+     * nếu số peer > 50 trong môi trường production.
+     */
+    private GroupSendResult doSend(List<PeerInfo> targets, String encrypted, String batchMsgId) {
+        if (encrypted == null) return new GroupSendResult(0, 0, targets.size());
+
+        Message groupMsg = new Message("GROUP_CHAT", session.myId(), encrypted);
         groupMsg.setMessageId(batchMsgId);
 
-        boolean isBroadcast = targets.equalsIgnoreCase("ALL");
-        String[] targetIds = targets.split(",");
+        List<CompletableFuture<String>> futures = targets.stream()
+                .map(p -> CompletableFuture.supplyAsync(() -> {
+                    String ack = session.messaging().sendReliable(p.getIpAddress(), p.getPort(), groupMsg);
+                    if (ack != null) return "OK";
+                    if (offline.tryStore(p.getPeerId(), encrypted, batchMsgId)) return "STORED";
+                    return "FAIL";
+                }))
+                .collect(Collectors.toList());
 
-        int successCount = 0;
-        System.out.println("--- ĐANG GỬI TIN NHÓM ---");
-
-        for (PeerInfo p : peers) {
-            if (p.getPeerId().equals(session.myId())) {
-                continue;
-            }
-
-            boolean shouldSend = isBroadcast;
-            if (!isBroadcast) {
-                for (String t : targetIds) {
-                    if (p.getPeerId().equalsIgnoreCase(t.trim())) {
-                        shouldSend = true;
-                        break;
-                    }
+        int success = 0, stored = 0, fail = 0;
+        for (CompletableFuture<String> f : futures) {
+            try {
+                switch (f.get()) {
+                    case "OK"     -> success++;
+                    case "STORED" -> stored++;
+                    default       -> fail++;
                 }
-            }
-
-            if (shouldSend) {
-                System.out.print("Gửi tới " + p.getPeerId() + "... ");
-                String ack = session.messaging().sendReliable(p.getIpAddress(), p.getPort(), groupMsg);
-                if (ack != null) {
-                    System.out.println("[Thành công]");
-                    successCount++;
-                } else {
-                    System.out.println("[Thất bại]");
-                    if (encryptedContent != null && offline.tryStore(p.getPeerId(), encryptedContent, batchMsgId)) {
-                        System.out.println("    -> Tracker giữ hộ tin cho " + p.getPeerId());
-                    }
-                }
+            } catch (Exception e) {
+                fail++;
             }
         }
-        System.out.println("-> [Hoàn tất! Đã gửi thành công tới " + successCount + " peer]");
+        return new GroupSendResult(success, stored, fail);
     }
 }

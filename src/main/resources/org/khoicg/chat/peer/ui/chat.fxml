@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.geometry.Insets?>
+<BorderPane xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="org.khoicg.chat.peer.ui.ChatController">
+
+    <!-- TOP: toolbar -->
+    <top>
+        <ToolBar styleClass="top-bar">
+            <Label fx:id="userInfoLabel" text="P2P Chat" styleClass="user-info-label"/>
+            <Region HBox.hgrow="ALWAYS"/>
+            <Button text="⟳  Làm mới peers" onAction="#handleRefreshPeers" styleClass="refresh-btn"/>
+            <Button text="Thoát" onAction="#handleExit" styleClass="exit-btn"/>
+        </ToolBar>
+    </top>
+
+    <!-- LEFT: peer list -->
+    <left>
+        <VBox styleClass="sidebar">
+            <Label text="PEERS ONLINE" styleClass="sidebar-title"/>
+            <ListView fx:id="peerListView" styleClass="peer-list" VBox.vgrow="ALWAYS"/>
+            <Button text="Làm mới danh sách" onAction="#handleRefreshPeers"
+                    maxWidth="Infinity" styleClass="sidebar-refresh-btn"/>
+        </VBox>
+    </left>
+
+    <!-- CENTER: log + send tabs -->
+    <center>
+        <VBox>
+            <!-- Message log -->
+            <TextArea fx:id="messageLogArea" editable="false" wrapText="true"
+                      styleClass="message-log" promptText="Tin nhắn sẽ hiện ở đây...">
+                <VBox.vgrow>ALWAYS</VBox.vgrow>
+            </TextArea>
+
+            <!-- Send tabs -->
+            <TabPane styleClass="send-tabs" tabClosingPolicy="UNAVAILABLE" prefHeight="130">
+
+                <!-- Tab 1: Chat trực tiếp -->
+                <Tab text="Chat trực tiếp">
+                    <GridPane hgap="8" vgap="8">
+                        <padding><Insets top="10" right="12" bottom="10" left="12"/></padding>
+                        <columnConstraints>
+                            <ColumnConstraints minWidth="65" maxWidth="65"/>
+                            <ColumnConstraints hgrow="SOMETIMES" minWidth="120"/>
+                            <ColumnConstraints minWidth="40" maxWidth="40"/>
+                            <ColumnConstraints minWidth="60" maxWidth="60"/>
+                            <ColumnConstraints minWidth="75" maxWidth="75"/>
+                        </columnConstraints>
+
+                        <Label text="IP:" styleClass="tab-label"
+                               GridPane.columnIndex="0" GridPane.rowIndex="0"/>
+                        <TextField fx:id="directIpField" promptText="localhost" styleClass="tab-field"
+                                   GridPane.columnIndex="1" GridPane.rowIndex="0"/>
+                        <Label text="Port:" styleClass="tab-label"
+                               GridPane.columnIndex="2" GridPane.rowIndex="0"/>
+                        <TextField fx:id="directPortField" promptText="5002" styleClass="tab-field"
+                                   GridPane.columnIndex="3" GridPane.rowIndex="0"/>
+
+                        <Label text="Tin nhắn:" styleClass="tab-label"
+                               GridPane.columnIndex="0" GridPane.rowIndex="1"/>
+                        <TextField fx:id="directMessageField" promptText="Nhập nội dung..." styleClass="tab-field"
+                                   GridPane.columnIndex="1" GridPane.rowIndex="1"
+                                   GridPane.columnSpan="3" GridPane.hgrow="ALWAYS"
+                                   onAction="#handleSendDirect"/>
+                        <Button text="Gửi" onAction="#handleSendDirect" styleClass="send-btn"
+                                GridPane.columnIndex="4" GridPane.rowIndex="1"/>
+                    </GridPane>
+                </Tab>
+
+                <!-- Tab 2: Chat nhóm -->
+                <Tab text="Chat nhóm">
+                    <GridPane hgap="8" vgap="8">
+                        <padding><Insets top="10" right="12" bottom="10" left="12"/></padding>
+                        <columnConstraints>
+                            <ColumnConstraints minWidth="65" maxWidth="65"/>
+                            <ColumnConstraints hgrow="ALWAYS"/>
+                            <ColumnConstraints minWidth="75" maxWidth="75"/>
+                        </columnConstraints>
+
+                        <Label text="Targets:" styleClass="tab-label"
+                               GridPane.columnIndex="0" GridPane.rowIndex="0"/>
+                        <TextField fx:id="groupTargetsField" promptText="ID1,ID2 hoặc ALL" styleClass="tab-field"
+                                   GridPane.columnIndex="1" GridPane.rowIndex="0"/>
+                        <Button text="Gửi nhóm" onAction="#handleSendGroup" styleClass="send-btn"
+                                GridPane.columnIndex="2" GridPane.rowIndex="0"/>
+
+                        <Label text="Tin nhắn:" styleClass="tab-label"
+                               GridPane.columnIndex="0" GridPane.rowIndex="1"/>
+                        <TextField fx:id="groupMessageField" promptText="Nhập tin nhắn nhóm..." styleClass="tab-field"
+                                   GridPane.columnIndex="1" GridPane.rowIndex="1"
+                                   onAction="#handleSendGroup"/>
+                    </GridPane>
+                </Tab>
+
+                <!-- Tab 3: Gửi file -->
+                <Tab text="Gửi file">
+                    <GridPane hgap="8" vgap="8">
+                        <padding><Insets top="10" right="12" bottom="10" left="12"/></padding>
+                        <columnConstraints>
+                            <ColumnConstraints minWidth="65" maxWidth="65"/>
+                            <ColumnConstraints hgrow="SOMETIMES" minWidth="100"/>
+                            <ColumnConstraints minWidth="40" maxWidth="40"/>
+                            <ColumnConstraints minWidth="60" maxWidth="60"/>
+                            <ColumnConstraints minWidth="65" maxWidth="65"/>
+                            <ColumnConstraints minWidth="75" maxWidth="75"/>
+                        </columnConstraints>
+
+                        <Label text="IP:" styleClass="tab-label"
+                               GridPane.columnIndex="0" GridPane.rowIndex="0"/>
+                        <TextField fx:id="fileIpField" promptText="localhost" styleClass="tab-field"
+                                   GridPane.columnIndex="1" GridPane.rowIndex="0"/>
+                        <Label text="Port:" styleClass="tab-label"
+                               GridPane.columnIndex="2" GridPane.rowIndex="0"/>
+                        <TextField fx:id="filePortField" promptText="5002" styleClass="tab-field"
+                                   GridPane.columnIndex="3" GridPane.rowIndex="0"/>
+
+                        <Label text="File:" styleClass="tab-label"
+                               GridPane.columnIndex="0" GridPane.rowIndex="1"/>
+                        <TextField fx:id="filePathField" promptText="Chọn file hoặc nhập đường dẫn..." styleClass="tab-field"
+                                   GridPane.columnIndex="1" GridPane.rowIndex="1"
+                                   GridPane.columnSpan="3"/>
+                        <Button text="Chọn..." onAction="#handleBrowseFile" styleClass="browse-btn"
+                                GridPane.columnIndex="4" GridPane.rowIndex="1"/>
+                        <Button text="Gửi file" onAction="#handleSendFile" styleClass="send-btn"
+                                GridPane.columnIndex="5" GridPane.rowIndex="1"/>
+                    </GridPane>
+                </Tab>
+
+                <!-- Tab 4: Relay -->
+                <Tab text="Relay">
+                    <GridPane hgap="8" vgap="8">
+                        <padding><Insets top="10" right="12" bottom="10" left="12"/></padding>
+                        <columnConstraints>
+                            <ColumnConstraints minWidth="72" maxWidth="72"/>
+                            <ColumnConstraints hgrow="SOMETIMES" minWidth="100"/>
+                            <ColumnConstraints minWidth="40" maxWidth="40"/>
+                            <ColumnConstraints minWidth="60" maxWidth="60"/>
+                            <ColumnConstraints minWidth="75" maxWidth="75"/>
+                        </columnConstraints>
+
+                        <Label text="Relay IP:" styleClass="tab-label"
+                               GridPane.columnIndex="0" GridPane.rowIndex="0"/>
+                        <TextField fx:id="relayIpField" promptText="localhost" styleClass="tab-field"
+                                   GridPane.columnIndex="1" GridPane.rowIndex="0"/>
+                        <Label text="Port:" styleClass="tab-label"
+                               GridPane.columnIndex="2" GridPane.rowIndex="0"/>
+                        <TextField fx:id="relayPortField" promptText="5002" styleClass="tab-field"
+                                   GridPane.columnIndex="3" GridPane.rowIndex="0"/>
+
+                        <Label text="Target ID:" styleClass="tab-label"
+                               GridPane.columnIndex="0" GridPane.rowIndex="1"/>
+                        <TextField fx:id="relayTargetField" promptText="Peer ID đích" styleClass="tab-field"
+                                   GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+                        <Label text="Tin nhắn:" styleClass="tab-label"
+                               GridPane.columnIndex="2" GridPane.rowIndex="1"
+                               GridPane.columnSpan="1"/>
+                        <TextField fx:id="relayMessageField" promptText="Nội dung..." styleClass="tab-field"
+                                   GridPane.columnIndex="3" GridPane.rowIndex="1"
+                                   onAction="#handleSendRelay"/>
+                        <Button text="Relay" onAction="#handleSendRelay" styleClass="send-btn"
+                                GridPane.columnIndex="4" GridPane.rowIndex="1"/>
+                    </GridPane>
+                </Tab>
+
+            </TabPane>
+        </VBox>
+    </center>
+
+</BorderPane>

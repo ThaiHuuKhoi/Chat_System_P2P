@@ -15,11 +15,36 @@ public final class RelaySendService {
         this.session = session;
     }
 
+    /**
+     * Gửi relay không qua Scanner (dùng cho GUI).
+     * @return "OK:...", "RELAY_FAIL:...", "NO_ACK", hoặc "ENCRYPT_FAIL"
+     */
+    public String send(String relayIp, int relayPort, String finalTargetId, String content) {
+        String encRelay = AESUtil.encrypt(content);
+        if (encRelay == null) return "ENCRYPT_FAIL";
+        Message relayMsg = new Message("RELAY", session.myId(), finalTargetId + "||" + encRelay);
+        relayMsg.setMessageId(MessageIdUtil.newId());
+        String relayAck = session.messaging().sendReliable(relayIp, relayPort, relayMsg);
+        if (relayAck == null) return "NO_ACK";
+        try {
+            Message rm = session.gson().fromJson(relayAck, Message.class);
+            if ("ACK".equals(rm.getType())) return "OK:" + rm.getContent();
+            if ("RELAY_FAIL".equals(rm.getType())) return "RELAY_FAIL:" + rm.getContent();
+        } catch (Exception ignored) {}
+        return "NO_ACK";
+    }
+
     public void runInteractive(Scanner scanner) {
         System.out.print("IP peer trung gian (relay): ");
         String relayIp = scanner.nextLine();
         System.out.print("Port peer trung gian: ");
-        int relayPort = Integer.parseInt(scanner.nextLine());
+        int relayPort;
+        try {
+            relayPort = Integer.parseInt(scanner.nextLine().trim());
+        } catch (NumberFormatException e) {
+            System.out.println("[-] Port không hợp lệ.");
+            return;
+        }
         System.out.print("Peer ID người nhận cuối: ");
         String finalTargetId = scanner.nextLine().trim();
         System.out.print("Nội dung tin nhắn: ");

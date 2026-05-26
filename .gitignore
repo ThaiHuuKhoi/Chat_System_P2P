@@ -61,6 +61,13 @@ build/
 # --- VS Code ---
 .vscode/
 
+# --- Claude Code (bộ nhớ nội bộ) ---
+.claude/
+
+# --- Báo cáo cục bộ ---
+BaoCao_P2PChat.html
+BaoCao_P2PChat.files/
+
 # --- Hệ điều hành ---
 .DS_Store
 .DS_Store?

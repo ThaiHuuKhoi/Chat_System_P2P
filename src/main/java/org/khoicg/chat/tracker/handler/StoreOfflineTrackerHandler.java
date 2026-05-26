@@ -25,8 +25,13 @@ public final class StoreOfflineTrackerHandler implements TrackerMessageHandler {
             storedMsg.setMessageId(msg.getMessageId());
         }
 
-        ctx.state().storeOfflineFor(targetId, storedMsg);
-        System.out.println("[*] Nhận giữ hộ 1 tin nhắn cho: " + targetId);
-        ctx.reply(new Message("ACK", "Tracker", "Đã lưu"));
+        boolean stored = ctx.state().storeOfflineFor(targetId, storedMsg);
+        if (stored) {
+            System.out.println("[*] Nhận giữ hộ 1 tin nhắn cho: " + targetId);
+            ctx.reply(new Message("ACK", "Tracker", "Đã lưu"));
+        } else {
+            System.out.println("[!] Hàng đợi offline của " + targetId + " đã đầy — từ chối lưu");
+            ctx.reply(new Message("NACK", "Tracker", "Hàng đợi offline đã đầy"));
+        }
     }
 }
