@@ -88,7 +88,7 @@ mvn -q compile exec:java -Dexec.mainClass=org.khoicg.chat.peer.PeerApp
 
 ## Chạy nhanh bằng JAR (không cần clone / Maven)
 
-Tải 2 file JAR từ thư mục `target/` về cùng một thư mục, rồi mở **2 terminal**:
+Tải 2 file JAR từ thư mục `dist/` về cùng một thư mục, rồi mở **2 terminal**:
 
 **Terminal 1 — Tracker**
 ```bash

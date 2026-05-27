@@ -16,13 +16,15 @@ buildNumber.properties
 hs_err_pid*
 replay_pid*
 
-# --- Artifacts ---
-*.jar
+# --- Artifacts (build output trong target/ đã bị ignore ở trên) ---
 *.war
 *.ear
 *.zip
 *.tar.gz
 *.rar
+
+# --- Cho phép JAR phân phối trong dist/ ---
+!dist/
 
 # --- Dự án: file nhận P2P ---
 downloads_*/
