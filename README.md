@@ -1,6 +1,6 @@
 # P2P Chat System (Chat_System_P2P)
 
-**Chủ đề 3:** Hệ thống phân tán — chat ngang hàng (Java): tracker bootstrap, tin P2P TCP, nhóm/broadcast, relay, offline store, mã hóa AES, mô phỏng churn. (Chord/DHT đã gỡ khỏi mã nguồn.)
+**Chủ đề 3:** Hệ thống phân tán — chat ngang hàng (Java): tracker bootstrap, tin P2P TCP, nhóm/broadcast, relay, offline store, mã hóa AES, mô phỏng churn. 
 
 ---
 
