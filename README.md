@@ -25,7 +25,7 @@
 
 | Công cụ | Phiên bản tối thiểu |
 |---|---|
-| JDK | 24+ |
+| JDK | 21+ |
 | Maven | 3.9+ |
 | JavaFX | đã khai báo trong `pom.xml` (tự tải qua Maven) |
 
@@ -100,7 +100,7 @@ java -jar tracker.jar
 java -jar peer.jar
 ```
 
-> Yêu cầu: **JDK 24+** đã cài và có trong PATH. JavaFX đã được bundle sẵn trong `peer.jar`, không cần cài thêm.
+> Yêu cầu: **JDK 21+** đã cài và có trong PATH. 
 
 ---
 
