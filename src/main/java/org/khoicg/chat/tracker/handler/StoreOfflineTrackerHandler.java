@@ -13,12 +13,29 @@ public final class StoreOfflineTrackerHandler implements TrackerMessageHandler {
 
     @Override
     public void handle(Message msg, TrackerHandleContext ctx) {
-        String[] parts = msg.getContent().split("\\|\\|", 2);
-        if (parts.length != 2) {
+        String[] parts = msg.getContent().split("\\|\\|", 3);
+        if (parts.length != 3) {
+            ctx.reply(new Message("NACK", "Tracker", "Định dạng STORE_OFFLINE không hợp lệ"));
             return;
         }
-        String targetId = parts[0];
-        String encryptedContent = parts[1];
+        String targetIp       = parts[0];
+        String targetPortStr  = parts[1];
+        String encryptedContent = parts[2];
+
+        int targetPort;
+        try {
+            targetPort = Integer.parseInt(targetPortStr);
+        } catch (NumberFormatException e) {
+            ctx.reply(new Message("NACK", "Tracker", "Port không hợp lệ"));
+            return;
+        }
+
+        String targetId = ctx.state().findKnownPeerByAddress(targetIp, targetPort);
+        if (targetId == null) {
+            System.out.println("[!] STORE_OFFLINE: không tìm thấy peer tại " + targetIp + ":" + targetPort);
+            ctx.reply(new Message("NACK", "Tracker", "Không tìm thấy peer theo địa chỉ"));
+            return;
+        }
 
         Message storedMsg = new Message("OFFLINE_CHAT", msg.getSenderId(), encryptedContent);
         if (msg.getMessageId() != null && !msg.getMessageId().isEmpty()) {

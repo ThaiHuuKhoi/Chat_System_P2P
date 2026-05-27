@@ -17,8 +17,9 @@ public final class TrackerState {
 
     private static final int OFFLINE_QUEUE_LIMIT = 50;
 
-    private final ConcurrentHashMap<String, PeerInfo> onlinePeers = new ConcurrentHashMap<>();
-    private final ConcurrentHashMap<String, Long> lastSeenPeers = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<String, PeerInfo> onlinePeers  = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<String, PeerInfo> knownPeers   = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<String, Long>     lastSeenPeers = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<String, List<Message>> offlineMessages = new ConcurrentHashMap<>();
 
     public void touch(String senderId) {
@@ -29,6 +30,7 @@ public final class TrackerState {
 
     public void registerPeer(PeerInfo newPeer) {
         onlinePeers.put(newPeer.getPeerId(), newPeer);
+        knownPeers.put(newPeer.getPeerId(), newPeer);
         lastSeenPeers.put(newPeer.getPeerId(), System.currentTimeMillis());
     }
 
@@ -38,6 +40,24 @@ public final class TrackerState {
         }
         onlinePeers.remove(peerId);
         lastSeenPeers.remove(peerId);
+        // knownPeers intentionally kept — needed for offline message routing
+    }
+
+    /** Tìm peerId của peer đã từng đăng ký theo địa chỉ IP:port. */
+    public String findKnownPeerByAddress(String ip, int port) {
+        String normalized = normalizeHost(ip);
+        for (PeerInfo p : knownPeers.values()) {
+            if (p.getPort() == port && normalizeHost(p.getIpAddress()).equals(normalized)) {
+                return p.getPeerId();
+            }
+        }
+        return null;
+    }
+
+    private static String normalizeHost(String host) {
+        if (host == null) return "";
+        String h = host.trim().toLowerCase();
+        return "127.0.0.1".equals(h) ? "localhost" : h;
     }
 
     public Collection<PeerInfo> onlinePeers() {

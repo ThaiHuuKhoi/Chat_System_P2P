@@ -1,12 +1,10 @@
 package org.khoicg.chat.peer.service;
 
 import org.khoicg.chat.model.Message;
-import org.khoicg.chat.model.PeerInfo;
 import org.khoicg.chat.peer.session.PeerSessionContext;
 import org.khoicg.chat.util.AESUtil;
 import org.khoicg.chat.util.MessageIdUtil;
 
-import java.util.List;
 import java.util.Scanner;
 
 public final class DirectChatService {
@@ -32,9 +30,7 @@ public final class DirectChatService {
         chatMsg.setMessageId(msgId);
         String ack = session.messaging().sendReliable(targetIp, targetPort, chatMsg);
         if (ack != null) return "OK";
-        List<PeerInfo> peers = directory.fetchOnlinePeers();
-        String targetPeerId = PeerAddressUtil.resolvePeerIdByAddress(peers, targetIp, targetPort);
-        if (targetPeerId != null && offline.tryStore(targetPeerId, encrypted, msgId)) {
+        if (offline.tryStore(targetIp, targetPort, encrypted, msgId)) {
             return "OFFLINE_STORED";
         }
         return "FAIL";
@@ -67,16 +63,10 @@ public final class DirectChatService {
         } else {
             System.out.println("-> [GỬI THẤT BẠI: Tin nhắn không tới được đích]");
             if (encryptedContent != null) {
-                List<PeerInfo> peers = directory.fetchOnlinePeers();
-                String targetPeerId = PeerAddressUtil.resolvePeerIdByAddress(peers, targetIp, targetPort);
-                if (targetPeerId != null) {
-                    if (offline.tryStore(targetPeerId, encryptedContent, msgId)) {
-                        System.out.println("-> [Tracker đã lưu tin; " + targetPeerId + " sẽ nhận khi online lại]");
-                    } else {
-                        System.out.println("-> [Không lưu được tin lên tracker]");
-                    }
+                if (offline.tryStore(targetIp, targetPort, encryptedContent, msgId)) {
+                    System.out.println("-> [Tracker đã lưu tin; peer sẽ nhận khi online lại]");
                 } else {
-                    System.out.println("-> [Không lưu offline: IP/Port không khớp peer nào trên tracker — xem menu 1]");
+                    System.out.println("-> [Không lưu được tin lên tracker — peer chưa từng đăng ký]");
                 }
             }
         }

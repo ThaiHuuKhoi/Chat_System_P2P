@@ -84,7 +84,7 @@ public final class GroupChatService {
                 .map(p -> CompletableFuture.supplyAsync(() -> {
                     String ack = session.messaging().sendReliable(p.getIpAddress(), p.getPort(), groupMsg);
                     if (ack != null) return "OK";
-                    if (offline.tryStore(p.getPeerId(), encrypted, batchMsgId)) return "STORED";
+                    if (offline.tryStore(p.getIpAddress(), p.getPort(), encrypted, batchMsgId)) return "STORED";
                     return "FAIL";
                 }))
                 .collect(Collectors.toList());

@@ -19,8 +19,8 @@ public final class OfflineMessageService {
         this.session = session;
     }
 
-    public boolean tryStore(String targetPeerId, String encryptedContent, String messageId) {
-        String payload = targetPeerId + "||" + encryptedContent;
+    public boolean tryStore(String targetIp, int targetPort, String encryptedContent, String messageId) {
+        String payload = targetIp + "||" + targetPort + "||" + encryptedContent;
         Message store = new Message("STORE_OFFLINE", session.myId(), payload);
         if (messageId != null && !messageId.isEmpty()) {
             store.setMessageId(messageId);
