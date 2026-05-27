@@ -4,6 +4,15 @@
 
 ---
 
+<details>
+<summary>🎬 Hướng dẫn chạy (xem video demo)</summary>
+
+<video src="how_to_start_by_intelijmp4.mp4" controls width="100%"></video>
+
+</details>
+
+---
+
 ## Yêu cầu
 
 | Công cụ | Phiên bản tối thiểu |
