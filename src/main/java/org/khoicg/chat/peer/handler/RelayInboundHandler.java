@@ -63,8 +63,24 @@ public final class RelayInboundHandler implements PeerInboundHandler {
                 }
             }
             if (dest == null) {
-                ctx.out().println(ctx.gson().toJson(
-                        new Message("RELAY_FAIL", "PeerServer", "Không tìm thấy đích trên tracker")));
+                // Peer đích không online — thử lưu offline theo peerId (tham khảo DirectChatService)
+                Message store = new Message("STORE_OFFLINE", msg.getSenderId(),
+                        targetId + "||" + encrypted);
+                if (msg.getMessageId() != null) store.setMessageId(msg.getMessageId());
+                String sresp = ctx.messaging().sendTracker(store);
+                boolean stored = false;
+                if (sresp != null) {
+                    try {
+                        Message sm = ctx.gson().fromJson(sresp, Message.class);
+                        stored = sm != null && "ACK".equals(sm.getType());
+                    } catch (Exception ignored) {}
+                }
+                if (stored) {
+                    ctx.writeAckFromPeer(msg, "Đích offline — tracker giữ hộ");
+                } else {
+                    ctx.out().println(ctx.gson().toJson(
+                            new Message("RELAY_FAIL", "PeerServer", "Không tìm thấy đích trên tracker")));
+                }
                 return;
             }
 
@@ -77,7 +93,8 @@ public final class RelayInboundHandler implements PeerInboundHandler {
                 return;
             }
 
-            Message store = new Message("STORE_OFFLINE", msg.getSenderId(), targetId + "||" + encrypted);
+            Message store = new Message("STORE_OFFLINE", msg.getSenderId(),
+                    dest.getIpAddress() + "||" + dest.getPort() + "||" + encrypted);
             store.setMessageId(msg.getMessageId());
             String sresp = ctx.messaging().sendTracker(store);
             boolean stored = false;

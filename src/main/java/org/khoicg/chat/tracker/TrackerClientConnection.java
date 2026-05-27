@@ -1,6 +1,7 @@
 package org.khoicg.chat.tracker;
 
 import com.google.gson.Gson;
+import org.khoicg.chat.config.AppConfig;
 import org.khoicg.chat.model.Message;
 
 import java.io.BufferedReader;
@@ -11,8 +12,6 @@ import java.net.Socket;
 
 final class TrackerClientConnection implements Runnable {
 
-    private static final int MAX_MSG_BYTES   = 1_048_576; // 1 MB
-    private static final int READ_TIMEOUT_MS = 10_000;    // 10 s
 
     private final Socket socket;
     private final TrackerState state;
@@ -33,12 +32,12 @@ final class TrackerClientConnection implements Runnable {
     @Override
     public void run() {
         try {
-            socket.setSoTimeout(READ_TIMEOUT_MS);
+            socket.setSoTimeout(AppConfig.trackerClientReadTimeoutMs());
         } catch (IOException ignored) {}
         try (BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
              PrintWriter out   = new PrintWriter(socket.getOutputStream(), true)) {
             String jsonInput = in.readLine();
-            if (jsonInput == null || jsonInput.length() > MAX_MSG_BYTES) return;
+            if (jsonInput == null || jsonInput.length() > AppConfig.trackerClientMaxMessageBytes()) return;
             Message msg = gson.fromJson(jsonInput, Message.class);
             if (msg != null && msg.getSenderId() != null) {
                 state.touch(msg.getSenderId());

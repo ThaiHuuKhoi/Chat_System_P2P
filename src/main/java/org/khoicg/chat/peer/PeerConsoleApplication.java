@@ -11,6 +11,7 @@ import org.khoicg.chat.peer.console.action.FileSendMenuAction;
 import org.khoicg.chat.peer.console.action.GroupChatMenuAction;
 import org.khoicg.chat.peer.console.action.ListPeersMenuAction;
 import org.khoicg.chat.peer.console.action.RelayMenuAction;
+import org.khoicg.chat.peer.service.FileTransferRegistry;
 import org.khoicg.chat.peer.service.PeerApplicationServices;
 import org.khoicg.chat.peer.service.PeerJoinService;
 import org.khoicg.chat.peer.session.PeerSessionContext;
@@ -30,11 +31,12 @@ public final class PeerConsoleApplication {
     private final PeerJoinService joinService;
     private final AtomicBoolean running;
 
-    public PeerConsoleApplication(Scanner scanner, MessagingClient messaging, String myId, int myPort) {
+    public PeerConsoleApplication(Scanner scanner, MessagingClient messaging, String myId, int myPort,
+                                   FileTransferRegistry fileRegistry) {
         this.scanner = scanner;
         Gson gson = new Gson();
         this.session = new PeerSessionContext(myId, myPort, messaging, gson);
-        this.services = PeerApplicationServices.create(session);
+        this.services = PeerApplicationServices.create(session, fileRegistry);
         this.joinService = new PeerJoinService(session, services.offline);
         this.running = new AtomicBoolean(true);
     }

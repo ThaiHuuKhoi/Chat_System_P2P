@@ -2,6 +2,8 @@ package org.khoicg.chat.tracker;
 
 import com.google.gson.Gson;
 import org.khoicg.chat.config.AppConfig;
+import org.khoicg.chat.config.AppConfig;
+import org.khoicg.chat.tracker.handler.GetKnownPeersTrackerHandler;
 import org.khoicg.chat.tracker.handler.GetPeersTrackerHandler;
 import org.khoicg.chat.tracker.handler.HeartbeatTrackerHandler;
 import org.khoicg.chat.tracker.handler.PullOfflineTrackerHandler;
@@ -19,14 +21,13 @@ import java.util.concurrent.Executors;
 
 public final class TrackerServer {
 
-    private static final int THREAD_POOL_SIZE = 10;
 
     private final int port;
     private final TrackerState state;
     private final TrackerMessageDispatcher dispatcher;
     private final Gson gson = new Gson();
     private final TrackerPushBroadcaster broadcaster;
-    private final ExecutorService requestPool = Executors.newFixedThreadPool(THREAD_POOL_SIZE);
+    private final ExecutorService requestPool = Executors.newFixedThreadPool(AppConfig.trackerServerThreadPoolSize());
 
     public TrackerServer(int port, TrackerState state, TrackerMessageDispatcher dispatcher,
                          TrackerPushBroadcaster broadcaster) {
@@ -53,6 +54,7 @@ public final class TrackerServer {
         List<TrackerMessageHandler> handlers = Arrays.asList(
                 new RegisterTrackerHandler(),
                 new GetPeersTrackerHandler(),
+                new GetKnownPeersTrackerHandler(),
                 new HeartbeatTrackerHandler(),
                 new QuitTrackerHandler(),
                 new StoreOfflineTrackerHandler(),

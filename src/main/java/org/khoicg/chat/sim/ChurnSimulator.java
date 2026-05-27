@@ -77,7 +77,9 @@ public final class ChurnSimulator {
     private static void churnLoop(String peerId, int listenPort, String trackerHost, int trackerPort, AtomicBoolean globalRun) {
         PeerClient client = new PeerClient();
         PeerMessagingAdapter messaging = new PeerMessagingAdapter(client, trackerHost, trackerPort);
-        PeerServer server = new PeerServer(listenPort, peerId, messaging);
+        PeerServer server = new PeerServer(listenPort, peerId, messaging,
+                new org.khoicg.chat.peer.service.FileTransferRegistry(
+                        org.khoicg.chat.config.AppConfig.fileTransferTimeoutMs()));
         server.setDaemon(true);
         server.start();
 

@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import org.khoicg.chat.config.AppConfig;
 import org.khoicg.chat.model.Message;
 import org.khoicg.chat.model.PeerInfo;
+import org.khoicg.chat.peer.service.FileTransferRegistry;
 
 import java.util.Scanner;
 
@@ -36,7 +37,8 @@ public final class PeerApp {
 
         PeerInfo self = new PeerInfo(myId, AppConfig.peerAdvertiseHost(), myPort);
 
-        PeerServer server = new PeerServer(myPort, myId, messaging);
+        FileTransferRegistry fileRegistry = new FileTransferRegistry(AppConfig.fileTransferTimeoutMs());
+        PeerServer server = new PeerServer(myPort, myId, messaging, fileRegistry);
         server.start();
 
         Message regMsg = new Message("REGISTER", myId, gson.toJson(self));
@@ -58,7 +60,7 @@ public final class PeerApp {
             }
         }
 
-        PeerConsoleApplication app = new PeerConsoleApplication(scanner, messaging, myId, myPort);
+        PeerConsoleApplication app = new PeerConsoleApplication(scanner, messaging, myId, myPort, fileRegistry);
         if (!app.completeJoin(regMsg, joinMode, knownIp, knownPort)) {
             System.exit(0);
         }

@@ -1,5 +1,6 @@
 package org.khoicg.chat.tracker;
 
+import org.khoicg.chat.config.AppConfig;
 import org.khoicg.chat.model.Message;
 import org.khoicg.chat.model.PeerInfo;
 
@@ -15,7 +16,6 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public final class TrackerState {
 
-    private static final int OFFLINE_QUEUE_LIMIT = 50;
 
     private final ConcurrentHashMap<String, PeerInfo> onlinePeers  = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<String, PeerInfo> knownPeers   = new ConcurrentHashMap<>();
@@ -43,6 +43,10 @@ public final class TrackerState {
         // knownPeers intentionally kept — needed for offline message routing
     }
 
+    public PeerInfo findKnownPeerById(String peerId) {
+        return peerId == null ? null : knownPeers.get(peerId);
+    }
+
     /** Tìm peerId của peer đã từng đăng ký theo địa chỉ IP:port. */
     public String findKnownPeerByAddress(String ip, int port) {
         String normalized = normalizeHost(ip);
@@ -64,11 +68,15 @@ public final class TrackerState {
         return onlinePeers.values();
     }
 
+    public Collection<PeerInfo> knownPeers() {
+        return knownPeers.values();
+    }
+
     public boolean storeOfflineFor(String targetId, Message storedMsg) {
         List<Message> queue = offlineMessages.computeIfAbsent(
                 targetId, k -> Collections.synchronizedList(new ArrayList<>()));
         synchronized (queue) {
-            if (queue.size() >= OFFLINE_QUEUE_LIMIT) return false;
+            if (queue.size() >= AppConfig.trackerOfflineQueueLimit()) return false;
             queue.add(storedMsg);
             return true;
         }

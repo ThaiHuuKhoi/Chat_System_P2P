@@ -1,6 +1,7 @@
 package org.khoicg.chat.tracker;
 
 import com.google.gson.Gson;
+import org.khoicg.chat.config.AppConfig;
 import org.khoicg.chat.model.Message;
 import org.khoicg.chat.model.PeerInfo;
 
@@ -18,7 +19,6 @@ import java.util.concurrent.Executors;
  */
 public final class TrackerPushBroadcaster {
 
-    private static final int CONNECT_TIMEOUT_MS = 2_000;
 
     private final ExecutorService pool = Executors.newCachedThreadPool(r -> {
         Thread t = new Thread(r);
@@ -42,7 +42,7 @@ public final class TrackerPushBroadcaster {
 
     private void push(String ip, int port, String json) {
         try (Socket socket = new Socket()) {
-            socket.connect(new InetSocketAddress(ip, port), CONNECT_TIMEOUT_MS);
+            socket.connect(new InetSocketAddress(ip, port), AppConfig.trackerPushConnectTimeoutMs());
             PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
             out.println(json);
         } catch (Exception ignored) {

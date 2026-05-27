@@ -14,6 +14,7 @@ import org.khoicg.chat.model.PeerInfo;
 import org.khoicg.chat.peer.PeerClient;
 import org.khoicg.chat.peer.PeerMessagingAdapter;
 import org.khoicg.chat.peer.PeerServer;
+import org.khoicg.chat.peer.service.FileTransferRegistry;
 import org.khoicg.chat.peer.service.PeerApplicationServices;
 import org.khoicg.chat.peer.service.PeerJoinService;
 import org.khoicg.chat.peer.session.PeerSessionContext;
@@ -92,10 +93,11 @@ public class LoginController {
                 PeerMessagingAdapter messaging = new PeerMessagingAdapter(peerClient);
                 Gson gson = new Gson();
                 PeerSessionContext session = new PeerSessionContext(myId, finalMyPort, messaging, gson);
-                PeerApplicationServices services = PeerApplicationServices.create(session);
+                FileTransferRegistry fileRegistry = new FileTransferRegistry(AppConfig.fileTransferTimeoutMs());
+                PeerApplicationServices services = PeerApplicationServices.create(session, fileRegistry);
                 AtomicBoolean running = new AtomicBoolean(true);
 
-                PeerServer server = new PeerServer(finalMyPort, myId, messaging);
+                PeerServer server = new PeerServer(finalMyPort, myId, messaging, fileRegistry);
                 server.setDaemon(true);
                 server.start();
 

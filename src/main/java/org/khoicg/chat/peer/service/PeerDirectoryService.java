@@ -1,6 +1,7 @@
 package org.khoicg.chat.peer.service;
 
 import com.google.gson.reflect.TypeToken;
+import org.khoicg.chat.config.AppConfig;
 import org.khoicg.chat.model.Message;
 import org.khoicg.chat.model.PeerInfo;
 import org.khoicg.chat.peer.session.PeerSessionContext;
@@ -10,7 +11,6 @@ import java.util.List;
 
 public final class PeerDirectoryService {
 
-    private static final long CACHE_TTL_MS = 5_000;
 
     private final PeerSessionContext session;
     private List<PeerInfo> cachedPeers;
@@ -27,7 +27,7 @@ public final class PeerDirectoryService {
      */
     public synchronized List<PeerInfo> fetchOnlinePeers() {
         long now = System.currentTimeMillis();
-        if (cachedPeers != null && now - cacheTimestamp < CACHE_TTL_MS) {
+        if (cachedPeers != null && now - cacheTimestamp < AppConfig.peerDirectoryCacheTtlMs()) {
             return cachedPeers;
         }
         String jsonResponse = session.messaging().sendTracker(
@@ -43,6 +43,21 @@ public final class PeerDirectoryService {
             }
         } catch (Exception ignored) {}
         return cachedPeers;
+    }
+
+    /** Trả tất cả peer đã từng đăng ký (kể cả đang offline). Không cache. */
+    public List<PeerInfo> fetchKnownPeers() {
+        String jsonResponse = session.messaging().sendTracker(
+                new Message("GET_KNOWN_PEERS", session.myId(), ""));
+        if (jsonResponse == null) return List.of();
+        try {
+            Message respMsg = session.gson().fromJson(jsonResponse, Message.class);
+            Type listType = new TypeToken<List<PeerInfo>>() {}.getType();
+            List<PeerInfo> result = session.gson().fromJson(respMsg.getContent(), listType);
+            return result != null ? result : List.of();
+        } catch (Exception ignored) {
+            return List.of();
+        }
     }
 
     /** Buộc lần gọi tiếp theo lấy dữ liệu mới từ Tracker (dùng cho nút Refresh GUI). */
