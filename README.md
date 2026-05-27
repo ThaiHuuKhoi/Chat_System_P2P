@@ -7,7 +7,15 @@
 <details>
 <summary>🎬 Hướng dẫn chạy (xem video demo)</summary>
 
-<video src="how_to_start_by_intelijmp4.mp4" controls width="100%"></video>
+<!-- 
+  Cách thêm video:
+  1. Mở file README.md trên GitHub web (nút Edit / bút chì)
+  2. Kéo thả file .mp4 / .mov vào vùng soạn thảo — GitHub tự upload và trả về URL dạng:
+     https://github.com/<user>/<repo>/assets/.../<tên-file>.mp4
+  3. Thay URL bên dưới bằng URL vừa nhận được, rồi xoá dòng comment này.
+-->
+
+<video src="THAY_URL_VIDEO_Ở_ĐÂY.mp4" controls width="100%"></video>
 
 </details>
 
@@ -78,17 +86,33 @@ mvn -q compile exec:java -Dexec.mainClass=org.khoicg.chat.peer.PeerApp
 
 ---
 
-## Đóng gói JAR (Tracker)
+## Chạy nhanh bằng JAR (không cần clone / Maven)
 
+Tải 2 file JAR từ thư mục `target/` về cùng một thư mục, rồi mở **2 terminal**:
+
+**Terminal 1 — Tracker**
 ```bash
-mvn package
+java -jar tracker.jar
 ```
 
-Tạo ra `target/tracker.jar` — chạy tracker độc lập (không cần Maven):
+**Terminal 2, 3, … — Peer (giao diện đồ họa)**
+```bash
+java -jar peer.jar
+```
+
+> Yêu cầu: **JDK 24+** đã cài và có trong PATH. JavaFX đã được bundle sẵn trong `peer.jar`, không cần cài thêm.
+
+---
+
+## Đóng gói JAR (dành cho dev)
 
 ```bash
-java -jar target/tracker.jar
+mvn package -Pdist
 ```
+
+Tạo ra trong `target/`:
+- `tracker.jar` — tracker độc lập
+- `peer.jar` — peer GUI, đã bundle JavaFX Windows
 
 ---
 

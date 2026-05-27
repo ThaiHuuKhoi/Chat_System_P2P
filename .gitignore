@@ -1,34 +1,31 @@
-﻿# --- Maven / Java ---
+# --- Maven build output ---
 target/
+dependency-reduced-pom.xml
 pom.xml.tag
 pom.xml.releaseBackup
 pom.xml.versionsBackup
 pom.xml.next
 release.properties
-dependency-reduced-pom.xml
 buildNumber.properties
 .mvn/timing.properties
+!.mvn/wrapper/maven-wrapper.jar
 
+# --- Java ---
 *.class
 *.log
 hs_err_pid*
 replay_pid*
 
-# --- Dự án Chat: file nhận P2P (FileInboundHandler: downloads_<port>/) ---
-downloads_*/
-
-# --- Tài liệu cục bộ (báo cáo, nháp — không đẩy lên remote) ---
-docs/
-
-# --- Gói / build cục bộ (giữ ngoại lệ wrapper nếu sau này thêm mvnw) ---
+# --- Artifacts ---
 *.jar
 *.war
-*.nar
 *.ear
 *.zip
 *.tar.gz
 *.rar
-!.mvn/wrapper/maven-wrapper.jar
+
+# --- Dự án: file nhận P2P ---
+downloads_*/
 
 # --- IntelliJ IDEA ---
 .idea/
@@ -37,49 +34,20 @@ docs/
 *.ipr
 out/
 
-# --- Eclipse ---
-.apt_generated
-.classpath
-.factorypath
-.project
-.settings/
-.springBeans
-.sts4-cache
-
-# --- NetBeans ---
-/nbproject/private/
-/nbbuild/
-/dist/
-/nbdist/
-/.nb-gradle/
-
-# --- Gradle (nếu dùng sau này) ---
-.gradle/
-build/
-!gradle/wrapper/gradle-wrapper.jar
-
 # --- VS Code ---
 .vscode/
 
-# --- Claude Code (bộ nhớ nội bộ) ---
+# --- Claude Code ---
 .claude/
 
-# --- Báo cáo cục bộ ---
+# --- Tài liệu cục bộ ---
+docs/
 BaoCao_P2PChat.html
 BaoCao_P2PChat.files/
 
 # --- Hệ điều hành ---
 .DS_Store
-.DS_Store?
-._*
 Thumbs.db
 Thumbs.db:encryptable
-ehthumbs.db
-ehthumbs_vista.db
 Desktop.ini
 $RECYCLE.BIN/
-
-# --- Tài liệu / PDF lớn cục bộ (bỏ comment dòng dưới nếu muốn commit file trong repo) ---
-# *.pdf
-
-
