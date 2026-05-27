@@ -5,7 +5,7 @@
 ---
 
 <details>
-<summary>🎬 Hướng dẫn chạy (xem video demo)</summary>
+<!-- <summary>🎬 Hướng dẫn chạy (xem video demo)</summary> -->
 
 <!-- 
   Cách thêm video:
